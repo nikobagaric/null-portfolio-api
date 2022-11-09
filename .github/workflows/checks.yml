@@ -4,7 +4,7 @@ name: Checks # github name
 on: [push] # trigger
 
 jobs: # what to do on trigger 
-  test-lint: # job id
+  test-lint:
     name: Test and Lint # new job, id
       runs-on: ubuntu-20.04 # linux mock runner; ubuntu ideal for project
       steps: # steps for job
