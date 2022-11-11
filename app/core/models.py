@@ -1,6 +1,9 @@
 """
 Database models
 """
+import uuid
+import os
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
@@ -8,6 +11,14 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+
+
+def section_image_file_path(instance, filename):
+    """Generate file path for new section image."""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'blog', filename)
 
 
 class UserManager(BaseUserManager):
@@ -43,6 +54,28 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Tag(models.Model):
+    """Tag model for blog filtering"""
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Section(models.Model):
+    """Section model for blog, the actual content of the post"""
+    header = models.CharField(max_length=255, null=True)
+    image = models.ImageField(null=True, upload_to=section_image_file_path)
+    description = models.CharField(max_length=5000, null=True, blank=True)
+
+    def __str__(self):
+        return self.header
 
 
 class Blog(models.Model):
