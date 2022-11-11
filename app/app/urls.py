@@ -31,5 +31,6 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name='api-schema'),
         name='api-docs',
     ),
-    path('api/blog/', include('blog.urls'))
+    path('api/user/', include('user.urls')),
+    path('api/blog/', include('blog.urls')),
 ]
