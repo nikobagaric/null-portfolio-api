@@ -41,3 +41,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Blog(models.Model):
+    """Blog post model."""
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=255, null=True)
+    detail = models.CharField(max_length=2000, null=True)
+    featured = models.BooleanField(default=False)
+    visit_count = models.IntegerField(default=0)
+    visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
