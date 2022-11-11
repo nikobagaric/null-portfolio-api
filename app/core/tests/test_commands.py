@@ -17,11 +17,11 @@ class CommandTests(SimpleTestCase):
 
     def test_wait_for_db_ready(self, patched_check):
         """Test waiting for database - ready state"""
-        patched_check.return_value = True # magic mock object :p
+        patched_check.return_value = True  # magic mock object :p
 
         call_command('wait_for_db')
 
-        patched_check.assert_called_once_with(databases=['default']) 
+        patched_check.assert_called_once_with(databases=['default'])
         # checks if right thing is called on test
 
     @patch('time.sleep')

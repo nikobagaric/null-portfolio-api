@@ -13,5 +13,25 @@ class BlogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = [''] #TO DO
+        fields = [
+                'id', 'title', 'detail',
+                'featured', 'visit_count',
+                'visible', 'created_at',
+                ]
         read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a blog post"""
+        post = Blog.objects.create(**validated_data)
+
+        # todo: add tags and secs
+
+        return post
+
+    def update(self, instance, validated_data):
+        """Update a post"""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
