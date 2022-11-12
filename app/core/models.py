@@ -80,7 +80,7 @@ class Section(models.Model):
 
 class Blog(models.Model):
     """Blog post model."""
-    author = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
@@ -90,6 +90,8 @@ class Blog(models.Model):
     visit_count = models.IntegerField(default=0)
     visible = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    sections = models.ManyToManyField('Section')
+    tags = models.ManyToManyField('Tag')
 
     def __str__(self):
         return self.title
