@@ -3,7 +3,6 @@ Views for the blog APIs
 """
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
     IsAuthenticated,
 )
 from rest_framework import (

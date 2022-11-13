@@ -16,6 +16,7 @@ from rest_framework.test import APIClient
 from core.models import (
     Blog,
     Tag,
+    Section,
 )
 
 from blog.serializers import (
@@ -62,7 +63,7 @@ class PublicBlogAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateRecipeAPITests(TestCase):
+class PrivatepostAPITests(TestCase):
     """Test authenticated API requests."""
 
     def setUp(self):
@@ -111,15 +112,13 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(post.user, self.user)
 
     def test_partial_update(self):
-        """Test patch on recipe"""
+        """Test patch on post"""
         orgdetail = 'Sample text'
         post = create_post(
             user=self.user,
             title='Sample',
             detail=orgdetail,
         )
-
-        print(post)
 
         payload = {'title': 'New title'}
         url = detail_url(post.id)
@@ -128,7 +127,6 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         post.refresh_from_db()
         self.assertEqual(post.title, payload['title'])
-        print(post)
         self.assertEqual(post.detail, orgdetail)
         self.assertEqual(post.user, self.user)
 
@@ -190,3 +188,139 @@ class PrivateRecipeAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Blog.objects.filter(id=post.id).exists())
+
+    def test_create_post_with_new_tags(self):
+        """Test creating a post with new tags."""
+        payload = {
+            'title': 'austriahungary.exe',
+            'detail': 'gott erhalte franz den kaiser',
+            'tags': [{'name': 'cool'}, {'name': 'stuff'}]
+        }
+        res = self.client.post(BLOG_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        posts = Blog.objects.filter(user=self.user)
+        self.assertEqual(posts.count(), 1)
+        post = posts[0]
+        self.assertEqual(post.tags.count(), 2)
+        for tag in payload['tags']:
+            exists = post.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_post_with_existing_tags(self):
+        """Test creating a post with existing tags."""
+        tag_new = Tag.objects.create(user=self.user, name='history')
+        payload = {
+            'title': 'austriahungary.exe',
+            'detail': 'gott erhalte franz den kaiser',
+            'tags': [{'name': 'cool'}, {'name': 'stuff'}, {'name': 'history'}]
+        }
+        res = self.client.post(BLOG_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        posts = Blog.objects.filter(user=self.user)
+        self.assertEqual(posts.count(), 1)
+        post = posts[0]
+        self.assertEqual(post.tags.count(), 3)
+        self.assertIn(tag_new, post.tags.all())
+        for tag in payload['tags']:
+            exists = post.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_tag_on_update(self):
+        """Test creating a tag when updating a post"""
+        post = create_post(user=self.user)
+
+        payload = {'tags': [{'name': 'trag'}]}
+        url = detail_url(post.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_tag = Tag.objects.get(user=self.user, name='trag')
+        self.assertIn(new_tag, post.tags.all())
+
+    def test_update_post_assign_tag(self):
+        """Test assigning an existing tag when updating a post."""
+        tag_breakfast = Tag.objects.create(user=self.user, name='Breakfast')
+        post = create_post(user=self.user)
+        post.tags.add(tag_breakfast)
+
+        tag_lunch = Tag.objects.create(user=self.user, name='Lunch')
+        payload = {'tags': [{'name': 'Lunch'}]}
+        url = detail_url(post.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag_lunch, post.tags.all())
+        self.assertNotIn(tag_breakfast, post.tags.all())
+
+    def test_clear_post_tags(self):
+        """Test clearing a posts tags."""
+        tag = Tag.objects.create(user=self.user, name='Dessert')
+        post = create_post(user=self.user)
+        post.tags.add(tag)
+
+        payload = {'tags': []}
+        url = detail_url(post.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(post.tags.count(), 0)
+
+    def test_create_post_with_new_sections(self):
+        """Test creating a post with new sections (only)"""
+        payload = {
+            'title': 'Sample text',
+            'detail': 'Lorem ipsum dolor sit amet',
+            'sections': [{'header': 'Lorem ipsum', 'description': 'dolor amet'}],
+        }
+        res = self.client.post(BLOG_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        posts = Blog.objects.filter(user=self.user)
+        self.assertEqual(posts.count(), 1)
+        post = posts[0]
+        self.assertEqual(post.sections.count(), 1)
+        for section in payload['sections']:
+            exists = post.sections.filter(
+                header=section['header'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_post_with_existing_sections(self):
+        """Test creating a post with new sections
+        (obsolete; there will never be a section that is reused until further notice)"""
+        section_new = Section.objects.create(
+            user=self.user,
+            header='ipsum',
+            description='desc'
+            )
+        payload = {
+            'title': 'Sample text',
+            'detail': 'Lorem ipsum dolor sit amet',
+            'sections': [
+                {'header': 'Lorem ipsum', 'description': 'dolor amet'},
+                {'header': 'ipsum', 'description': 'desc'}
+                ],
+        }
+        res = self.client.post(BLOG_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        posts = Blog.objects.filter(user=self.user)
+        self.assertEqual(posts.count(), 1)
+        post = posts[0]
+        self.assertEqual(post.sections.count(), 2)
+        self.assertIn(section_new, post.sections.all())
+        for section in payload['sections']:
+            exists = post.sections.filter(
+                header=section['header'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)

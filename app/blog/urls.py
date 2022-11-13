@@ -12,7 +12,7 @@ from blog import views
 
 
 router = DefaultRouter()
-router.register('blog', views.BlogViewSet)
+router.register('post', views.BlogViewSet)
 router.register('tag', views.TagViewSet)
 router.register('section', views.SectionViewSet)
 

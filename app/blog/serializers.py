@@ -30,6 +30,8 @@ class TagSerializer(serializers.ModelSerializer):
 
 class BlogSerializer(serializers.ModelSerializer):
     """Serializer for the blog model."""
+    tags = TagSerializer(many=True, required=False)
+    sections = SectionSerializer(many=True, required=False)
 
     class Meta:
         model = Blog
@@ -37,7 +39,7 @@ class BlogSerializer(serializers.ModelSerializer):
                 'id', 'title', 'detail',
                 'featured', 'visit_count',
                 'visible', 'created_at',
-                'tags',
+                'tags', 'sections'
                 ]
         read_only_fields = ['id']
 
@@ -64,7 +66,7 @@ class BlogSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create a blog post"""
         tags = validated_data.pop('tags', [])
-        sections = validated_data.pop('tags', [])
+        sections = validated_data.pop('sections', [])
         post = Blog.objects.create(**validated_data)
         self._get_or_create_tags(tags, post)
         self._get_or_create_sections(sections, post)
@@ -74,7 +76,7 @@ class BlogSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update a post"""
         tags = validated_data.pop('tags', None)
-        sections = validated_data.pop('tags', None)
+        sections = validated_data.pop('sections', None)
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
@@ -90,11 +92,10 @@ class BlogSerializer(serializers.ModelSerializer):
 
 
 class BlogDetailSerializer(BlogSerializer):
-    """Detailed blog (section view)"""
+    """Detailed blog (to-do)"""
 
     class Meta(BlogSerializer.Meta):
-        fields = BlogSerializer.Meta.fields + ['sections']
-
+        fields = BlogSerializer.Meta.fields
 
 class SectionImageSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to a section"""

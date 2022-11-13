@@ -70,8 +70,12 @@ class Tag(models.Model):
 
 class Section(models.Model):
     """Section model for blog, the actual content of the post"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     header = models.CharField(max_length=255, null=True)
-    image = models.ImageField(null=True, upload_to=section_image_file_path)
+    image = models.ImageField(null=True, upload_to=section_image_file_path, blank=True)
     description = models.CharField(max_length=5000, null=True, blank=True)
 
     def __str__(self):
