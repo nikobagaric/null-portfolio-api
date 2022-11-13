@@ -24,6 +24,8 @@ from core.models import (
     Blog,
     Tag,
     Section,
+    Comment,
+    Reply,
 )
 from blog import serializers
 
@@ -142,3 +144,15 @@ class SectionViewSet(BaseAttrViewSet):
             return serializers.SectionImageSerializer
 
         return self.serializer_class
+
+
+class CommentViewSet(BaseAttrViewSet):
+    """View for managing comments in the database."""
+    serializer_class = serializers.CommentSerializer
+    queryset = Comment.objects.all()
+
+
+class ReplyViewSet(BaseAttrViewSet):
+    """View for managing replies in the database."""
+    serializer_class = serializers.ReplySerializer
+    queryset = Reply.objects.all()

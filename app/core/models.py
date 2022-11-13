@@ -21,6 +21,10 @@ def section_image_file_path(instance, filename):
     return os.path.join('uploads', 'blog', filename)
 
 
+"""
+GLOBAL MODELS
+"""
+
 class UserManager(BaseUserManager):
     """Manager for users"""
 
@@ -55,6 +59,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
+"""
+BLOG API MODELS
+"""
 
 class Tag(models.Model):
     """Tag model for blog filtering"""
@@ -99,3 +106,33 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    """Comment model for blog"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        Blog,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    body = models.CharField(max_length=2500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Reply(models.Model):
+    """Reply model for comment"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        related_name='reply',
+    )
+    body = models.CharField(max_length=2500)
+    created_at = models.DateTimeField(auto_now_add=True)

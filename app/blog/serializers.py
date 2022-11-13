@@ -7,6 +7,8 @@ from core.models import (
     Blog,
     Section,
     Tag,
+    Comment,
+    Reply,
 )
 
 
@@ -41,7 +43,7 @@ class BlogSerializer(serializers.ModelSerializer):
                 'visible', 'created_at',
                 'tags', 'sections'
                 ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'created_at']
 
     def _get_or_create_tags(self, tags, post):
         """Handle getting or creating tags as needed"""
@@ -105,3 +107,21 @@ class SectionImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
         read_only_fields = ['id']
         extra_kwargs = {'image': {'required': 'False'}}
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for comments"""
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'body', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class ReplySerializer(serializers.ModelSerializer):
+    """Serializer for replies"""
+
+    class Meta:
+        model = Reply
+        fields = ['id', 'body', 'created_at']
+        read_only_fields = ['id', 'created_at']

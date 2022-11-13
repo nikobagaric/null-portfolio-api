@@ -11,6 +11,18 @@ def create_user(email='user@example.com', password='testpass123'):
     """Create and return a new user"""
     return get_user_model().objects.create_user(email, password)
 
+def create_post(user, **params):
+    """Create and return a sample blog post"""
+    defaults = {
+        'title': 'Sample Text',
+        'detail': 'Lorem ipsum dolor sit amet',
+        'featured': True,
+    }
+    defaults.update(params)
+
+    post = models.Blog.objects.create(user=user, **defaults)
+    return post
+
 
 class ModelTests(TestCase):
     """Test models"""
@@ -85,3 +97,32 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(section), section.header)
+
+    def test_create_comment(self):
+        """Test creating a comment is succesful"""
+        user = create_user()
+        post = create_post(user=user)
+        comment = models.Comment.objects.create(
+            user=user,
+            post=post,
+            body='sample text',
+        )
+
+        self.assertTrue(comment)
+
+    def test_create_reply(self):
+        """Test creating a comment reply is succesful"""
+        user = create_user()
+        post = create_post(user=user)
+        comment = models.Comment.objects.create(
+            user=user,
+            post=post,
+            body='sample text',
+        )
+        reply = models.Reply.objects.create(
+            user=user,
+            comment=comment,
+            body='sample reply',
+        )
+
+        self.assertTrue(reply)

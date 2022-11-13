@@ -324,3 +324,5 @@ class PrivatepostAPITests(TestCase):
                 user=self.user,
             ).exists()
             self.assertTrue(exists)
+
+    # TO DO: ADD MORE RIGOROUS TESTS FOR PUT PATCH DELETE AND SECTION IMAGE UPLOAD
