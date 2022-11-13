@@ -90,8 +90,8 @@ class Blog(models.Model):
     visit_count = models.IntegerField(default=0)
     visible = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    sections = models.ManyToManyField('Section')
-    tags = models.ManyToManyField('Tag')
+    sections = models.ManyToManyField(Section, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return self.title
