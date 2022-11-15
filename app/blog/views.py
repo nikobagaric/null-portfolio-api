@@ -118,7 +118,7 @@ class BaseAttrViewSet(mixins.UpdateModelMixin,
         )
         queryset = self.queryset
         if assigned_only:
-            queryset = queryset.filter(recipe__isnull=False)
+            queryset = queryset.filter(blog__isnull=False)
 
         return queryset.filter(
             user=self.request.user

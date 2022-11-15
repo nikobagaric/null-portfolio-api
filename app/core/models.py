@@ -103,6 +103,7 @@ class Blog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     sections = models.ManyToManyField(Section, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    likes = models.ManyToManyField(User, blank=True, related_name='likes')
 
     def __str__(self):
         return self.title

@@ -9,7 +9,21 @@ from core.models import (
     Tag,
     Comment,
     Reply,
+    User,
 )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for users"""
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'name' 'email', 'password',
+            'is_active', 'is_staff',
+            ]
+        read_only_fields = ['id', 'email']
+        write_only_fields = ['password']
 
 
 class SectionSerializer(serializers.ModelSerializer):
@@ -34,6 +48,7 @@ class BlogSerializer(serializers.ModelSerializer):
     """Serializer for the blog model."""
     tags = TagSerializer(many=True, required=False)
     sections = SectionSerializer(many=True, required=False)
+    likes = UserSerializer(many=True, required=False)
 
     class Meta:
         model = Blog
@@ -41,7 +56,7 @@ class BlogSerializer(serializers.ModelSerializer):
                 'id', 'title', 'detail',
                 'featured', 'visit_count',
                 'visible', 'created_at',
-                'tags', 'sections'
+                'tags', 'sections', 'likes',
                 ]
         read_only_fields = ['id', 'created_at']
 
