@@ -1,11 +1,6 @@
 """
 Tests for the blog post api
 """
-
-# my dumb dumb called user user and now it is too late
-
-# import os
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -331,13 +326,26 @@ class PrivatepostAPITests(TestCase):
             self.assertTrue(exists)
 
     def test_post_liked_by_user(self):
-        """Test put/patch request for liking a blog post"""
+        """Test request for liking a blog post"""
         post = create_post(user=self.user)
 
         url = post_like_url(post.id)
         res = self.client.post(url)
 
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(self.user, post.likes.all())
         self.assertEqual(post.likes.count(), 1)
+
+    def test_post_disliked_by_user(self):
+        """Test request for liking a blog post twice"""
+        post = create_post(user=self.user, title='title!')
+
+        url = post_like_url(post.id)
+        self.client.post(url)
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotIn(self.user, post.likes.all())
+        self.assertEqual(post.likes.count(), 0)
 
     # TO DO: ADD MORE RIGOROUS TESTS FOR PUT PATCH DELETE AND SECTION IMAGE UPLOAD

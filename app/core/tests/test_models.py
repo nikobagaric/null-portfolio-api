@@ -102,13 +102,13 @@ class ModelTests(TestCase):
         """Test creating a comment is succesful"""
         user = create_user()
         post = create_post(user=user)
-        comment = models.Comment.objects.create(
+        models.Comment.objects.create(
             user=user,
             post=post,
             body='sample text',
         )
 
-        self.assertTrue(comment)
+        self.assertTrue(models.Comment.objects.filter(user=user).exists())
 
     def test_create_reply(self):
         """Test creating a comment reply is succesful"""
@@ -125,4 +125,4 @@ class ModelTests(TestCase):
             body='sample reply',
         )
 
-        self.assertTrue(reply)
+        self.assertTrue(models.Reply.objects.filter(user=user).exists())

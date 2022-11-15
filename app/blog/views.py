@@ -86,7 +86,7 @@ class BlogViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=True, url_path='like-post')
     def like_post(self, request, pk=None):
-        """Like a post"""
+        """Like or remove like from a post"""
         post = self.get_object()
         serializer = self.get_serializer(post, data=request.data)
 
@@ -119,9 +119,10 @@ class BaseAttrViewSet(mixins.UpdateModelMixin,
     """Base viewset for attributes."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
+    order_name = 'name'  # default ordering
 
     def get_queryset(self):
-        """Filter queryset to authenticated user."""
+        """Filter queryset to authenticated or read only user."""
         assigned_only = bool(
             int(self.request.query_params.get('assigned_only', 0))
         )
@@ -131,7 +132,7 @@ class BaseAttrViewSet(mixins.UpdateModelMixin,
 
         return queryset.filter(
             user=self.request.user
-        ).order_by('-name').distinct()
+        ).order_by(f'-{self.order_name}').distinct()
 
 
 class TagViewSet(BaseAttrViewSet):
@@ -144,6 +145,7 @@ class SectionViewSet(BaseAttrViewSet):
     """View for managing sections in the database"""
     serializer_class = serializers.SectionSerializer
     queryset = Section.objects.all()
+    order_name = 'header'
 
     def get_serializer_class(self):
         """Return the serializer class for the section request"""
