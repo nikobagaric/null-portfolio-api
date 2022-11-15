@@ -32,6 +32,11 @@ def detail_url(blog_id):
     return reverse('blog:blog-detail', args=[blog_id])
 
 
+def post_like_url(blog_id):
+    """Create and return a blog like URL."""
+    return reverse('blog:blog-like-post', args=[blog_id])
+
+
 def create_post(user, **params):
     """Create and return a sample blog post"""
     defaults = {
@@ -58,7 +63,7 @@ class PublicBlogAPITests(TestCase):
 
     def test_auth_required(self):
         """Test auth is required to call API."""
-        res = self.client.get(BLOG_URL)
+        res = self.client.post(BLOG_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -324,5 +329,15 @@ class PrivatepostAPITests(TestCase):
                 user=self.user,
             ).exists()
             self.assertTrue(exists)
+
+    def test_post_liked_by_user(self):
+        """Test put/patch request for liking a blog post"""
+        post = create_post(user=self.user)
+
+        url = post_like_url(post.id)
+        res = self.client.post(url)
+
+        self.assertIn(self.user, post.likes.all())
+        self.assertEqual(post.likes.count(), 1)
 
     # TO DO: ADD MORE RIGOROUS TESTS FOR PUT PATCH DELETE AND SECTION IMAGE UPLOAD

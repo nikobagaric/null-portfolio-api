@@ -4,6 +4,7 @@ Views for the blog APIs
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import (
     IsAuthenticated,
+    IsAuthenticatedOrReadOnly
 )
 from rest_framework import (
     viewsets,
@@ -19,6 +20,8 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
 )
+
+from django.shortcuts import get_object_or_404
 
 from core.models import (
     Blog,
@@ -50,7 +53,7 @@ class BlogViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.BlogDetailSerializer
     queryset = Blog.objects.all()
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def _paramts_to_ints(self, qs):
         """Convert a list of strings to integers"""
@@ -72,6 +75,8 @@ class BlogViewSet(viewsets.ModelViewSet):
         """Return the serializer class for the request, obsolete function"""
         if self.action == 'list':
             return serializers.BlogSerializer
+        elif self.action == 'like_post':
+            return serializers.BlogLikeSerializer
 
         return self.serializer_class
 
@@ -79,17 +84,21 @@ class BlogViewSet(viewsets.ModelViewSet):
         """Create a new post."""
         serializer.save(user=self.request.user)
 
-    @action(methods=['POST'], detail=True, url_path='upload-image')
-    def upload_image(self, request, pk=None):
-        """Upload an image to post"""
+    @action(methods=['POST'], detail=True, url_path='like-post')
+    def like_post(self, request, pk=None):
+        """Like a post"""
         post = self.get_object()
         serializer = self.get_serializer(post, data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if post.likes.filter(id=request.user.id).exists():
+                post.likes.remove(request.user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                post.likes.add(request.user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema_view(
@@ -109,7 +118,7 @@ class BaseAttrViewSet(mixins.UpdateModelMixin,
                             viewsets.GenericViewSet):
     """Base viewset for attributes."""
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
@@ -144,6 +153,18 @@ class SectionViewSet(BaseAttrViewSet):
             return serializers.SectionImageSerializer
 
         return self.serializer_class
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        """Upload an image to post"""
+        section = self.get_object()
+        serializer = self.get_serializer(section, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommentViewSet(BaseAttrViewSet):

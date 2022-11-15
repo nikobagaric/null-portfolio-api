@@ -13,13 +13,13 @@ from core.models import (
     Section,
 )
 
-from serializers import (
+from blog.serializers import (
     SectionImageSerializer,
     SectionSerializer
 )
 
 
-SECTION_URL = reverse('section:section-list')
+SECTION_URL = reverse('blog:section-list')
 
 
 def detail_url(section_id):
@@ -40,6 +40,6 @@ class PublicTagsApiTests(TestCase):
 
     def test_auth_required(self):
         """Test auth is required for retrieving sections."""
-        res = self.client.get(SECTION_URL)
+        res = self.client.post(SECTION_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

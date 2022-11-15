@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'name' 'email', 'password',
+            'id', 'name', 'email', 'password',
             'is_active', 'is_staff',
             ]
         read_only_fields = ['id', 'email']
@@ -80,6 +80,10 @@ class BlogSerializer(serializers.ModelSerializer):
             )
             post.sections.add(section_obj)
 
+    def _get_user(self, post):
+        auth_user = self.context['request'].user
+        post.likes.add(auth_user)
+
     def create(self, validated_data):
         """Create a blog post"""
         tags = validated_data.pop('tags', [])
@@ -114,6 +118,18 @@ class BlogDetailSerializer(BlogSerializer):
     class Meta(BlogSerializer.Meta):
         fields = BlogSerializer.Meta.fields
 
+
+class BlogLikeSerializer(serializers.ModelSerializer):
+    """Serializer for likes"""
+    likes = UserSerializer(many=True, required=False)
+
+    class Meta:
+        model = Blog
+        fields = ['id', 'likes']
+        read_only_fields = ['id']
+        extra_kwargs = {'likes': {'required': 'False'}}
+
+
 class SectionImageSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to a section"""
 
@@ -121,7 +137,7 @@ class SectionImageSerializer(serializers.ModelSerializer):
         model = Section
         fields = ['id', 'image']
         read_only_fields = ['id']
-        extra_kwargs = {'image': {'required': 'False'}}
+        extra_kwargs = {'image': {'required': 'True'}}
 
 
 class CommentSerializer(serializers.ModelSerializer):
