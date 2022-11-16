@@ -142,17 +142,19 @@ class SectionImageSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for comments"""
+    post = BlogSerializer(many=False, required=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'body', 'created_at']
+        fields = ['id', 'body', 'post', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 
 class ReplySerializer(serializers.ModelSerializer):
     """Serializer for replies"""
+    comment = CommentSerializer(many=False, required=True)
 
     class Meta:
         model = Reply
-        fields = ['id', 'body', 'created_at']
+        fields = ['id', 'body', 'comment', 'created_at']
         read_only_fields = ['id', 'created_at']

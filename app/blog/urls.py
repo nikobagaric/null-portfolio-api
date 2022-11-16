@@ -15,6 +15,8 @@ router = DefaultRouter()
 router.register('post', views.BlogViewSet)
 router.register('tag', views.TagViewSet)
 router.register('section', views.SectionViewSet)
+router.register('comment', views.CommentViewSet)
+router.register('reply', views.ReplyViewSet)
 
 app_name = 'blog'
 
