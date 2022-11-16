@@ -119,7 +119,7 @@ class ModelTests(TestCase):
             post=post,
             body='sample text',
         )
-        reply = models.Reply.objects.create(
+        models.Reply.objects.create(
             user=user,
             comment=comment,
             body='sample reply',

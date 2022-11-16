@@ -169,14 +169,14 @@ class SectionViewSet(BaseAttrViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentViewSet(BaseAttrViewSet):
+class CommentViewSet(BaseAttrViewSet, mixins.CreateModelMixin):
     """View for managing comments in the database."""
     serializer_class = serializers.CommentSerializer
     order_name = 'created_at'
     queryset = Comment.objects.all()
 
 
-class ReplyViewSet(BaseAttrViewSet):
+class ReplyViewSet(BaseAttrViewSet, mixins.CreateModelMixin):
     """View for managing replies in the database."""
     serializer_class = serializers.ReplySerializer
     order_name = 'created_at'
