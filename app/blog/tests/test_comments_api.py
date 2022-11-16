@@ -40,7 +40,7 @@ def create_post(user, **params):
     }
     defaults.update(params)
 
-    post = Comment.objects.create(user=user, **defaults)
+    post = Blog.objects.create(user=user, **defaults)
     return post
 
 
@@ -76,8 +76,6 @@ class PrivateCommentAPITests(TestCase):
 
     def test_retrieve_comments(self):
         """Test retrieving a list of comments"""
-        post = create_post()
-
         Comment.objects.create(user=self.user, post=self.post, body='body 1')
         Comment.objects.create(user=self.user, post=self.post, body='body 2')
 
@@ -94,7 +92,7 @@ class PrivateCommentAPITests(TestCase):
 
         payload = {'body': 'body 2'}
         url = detail_url(comment.id)
-        res = self.client.put(url, payload)
+        res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         comment.refresh_from_db()

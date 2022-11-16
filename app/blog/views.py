@@ -172,10 +172,12 @@ class SectionViewSet(BaseAttrViewSet):
 class CommentViewSet(BaseAttrViewSet):
     """View for managing comments in the database."""
     serializer_class = serializers.CommentSerializer
+    order_name = 'created_at'
     queryset = Comment.objects.all()
 
 
 class ReplyViewSet(BaseAttrViewSet):
     """View for managing replies in the database."""
     serializer_class = serializers.ReplySerializer
+    order_name = 'created_at'
     queryset = Reply.objects.all()
